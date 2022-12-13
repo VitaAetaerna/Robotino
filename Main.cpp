@@ -184,39 +184,54 @@ void drive()
 	}
 	*/
 
+
 	if (0 == Direction){
-		omniDrive.setVelocity(0.1, 0, 0);
-		if (1 <= x_distance){
+		omniDrive.setVelocity(0.2, 0, 0);
+		if (0.5 <= x_distance){
 			Direction = 1;
 		}
 	}
 
 
 	if (1 == Direction){
-		omniDrive.setVelocity(-0.1, 0, 0);
+		omniDrive.setVelocity(-0.2, 0, 0);
+		if (0.1 >=  x_distance){
+			Direction = 2;
+		}
 
-		if (0.3 >= x_distance)
-		Direction = 2;
 	}
 
 	if (2 == Direction){
-		omniDrive.setVelocity(0.1, 0.1, 0);
-
-		if (x_distance <= 1 && 1 <= y_distance ){
+		omniDrive.setVelocity(0.2, 0.2, 0);
+		if (0.2 <= x_distance && 0.28 <= y_distance){
 			Direction = 3;
+		} 
+	}
+
+	if (3 == Direction){
+		omniDrive.setVelocity(-0.2, -0.2, 0);
+		if(0.1 >= x_distance && 0.1 >= y_distance){
+			Direction = 4;
 		}
 	}
 
-	if (3 == Direction){	
-		for (int i = 0; i < 200; i++){
-		
-			omniDrive.setVelocity(0.1, 0.1, 0);
+	if (4 == Direction){
+		omniDrive.setVelocity(0, 0.2, 0);
+		if (0.5 <= y_distance){
+			Direction = 5;
 		}
 	}
 
+	if (5 == Direction){
+		omniDrive.setVelocity(0, -0.2, 0);
+		if (0.1 >= y_distance){
+			Direction = 6;
+		}
+	}
+	
 
 	com.processEvents();
-    rec::robotino::api2::msleep(100); 
+    rec::robotino::api2::msleep(10); 
 	}
 }
 
@@ -226,6 +241,7 @@ void CrossingDriveanndRotate(){
 		DriveorRotate = false;
 		rotate360();
 	}
+
 
 	if (false == DriveorRotate){
 		DriveorRotate = true;
@@ -240,7 +256,7 @@ void destroy()
 
 int main( int argc, char **argv )
 {
-	std::string hostname = "192.168.100.170";
+	std::string hostname = "172.27.1.1";
 	if( argc > 1 )
 	{
 		hostname = argv[1];
@@ -278,5 +294,4 @@ int main( int argc, char **argv )
 	rec::robotino::api2::waitForKey();
 #endif
 }
-
 
