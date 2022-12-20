@@ -1,11 +1,10 @@
-
 #include <iostream>
 #include <stdlib.h>
-
 #include "rec/robotino/api2/all.h"
+#include <iostream>
 
 using namespace rec::robotino::api2;
-
+using namespace std;
 bool _run = true;
 
 class MyCom : public Com
@@ -56,10 +55,27 @@ public:
 	bool bumped;
 };
 
+double x_distance = 0;
+double y_distance = 0;
+double phi_absolute = 0;
+unsigned int sequence = 0;
+
+class MyOdometry: public Odometry{
+  void readingsEvent(double x,double y, double phi, float vx, float vy, float omega, unsigned int seq ){
+	cout << "X: " << x << " Y: " << y << " Richtung: " << phi << " Sequenz: " << seq << endl;  
+	x_distance = x;
+	y_distance = y;
+	phi_absolute = phi;
+	sequence = seq;
+	}
+};
 
 MyCom com;
-Bumper bumper;
+MyBumper bumper;
 OmniDrive omniDrive;
+MyOdometry odo;
+
+
 
 void init( const std::string& hostname )
 {
@@ -82,78 +98,143 @@ void init( const std::string& hostname )
 	}
 }
 
+
+bool DriveorRotate = true;   //TRUE == FAHRENB
+void rotateLeft(){
+	int Rotation = 0;
+	int turning = 0;
+	cout << "Enter Rotation (2.96 Ganze Umdrehung): ";
+	cin >> Rotation;
+	
+	if (0 <= Rotation){
+		turning = 1;
+	}
+
+	while (1 == turning){
+		com.processEvents();
+		omniDrive.setVelocity(0, 0, -0.4);
+		cout << phi_absolute;
+		rec::robotino::api2::msleep(100);
+	    // cout << "X: " << x << " Y: " << y << "Richtung: " << phi << "Sequenz: " << s << endl;
+		if (Rotation <= phi_absolute){
+			turning = 0;
+			
+		}
+	}
+	com.processComEvents();
+	
+
+}
+
+void rotateRight(){
+	int Rotation = 0;
+	int turning = 0;
+	cout << "Enter Rotation (2.96 Ganze Umdrehung): ";
+	cin >> Rotation;
+	
+	if (0 <= Rotation){
+		turning = 1;
+	}
+
+	while (1 == turning){
+		com.processEvents();
+		omniDrive.setVelocity(0, 0, 0.4);
+		cout << phi_absolute;
+		rec::robotino::api2::msleep(100);
+	    // cout << "X: " << x << " Y: " << y << "Richtung: " << phi << "Sequenz: " << s << endl;
+		if (Rotation <= phi_absolute){
+			turning = 0;
+			
+		}
+	}
+	com.processComEvents();
+	
+
+}
+
+
+
+
 void drive()
 {
+
+
+
+	// Straight = 0, Backwards = 1, RightTop = 2, Right = 3, BottomRight = 4, BottomLeft = 5, Left = 6, TopLeft = 7
+	
+	
+
+
+
+    char w;
+  	odo.set(0,0,0,-1);
+	
+
 	while( com.isConnected() && false == bumper.value() && _run )
 	{
-    com.processEvents();
-		//TODO: your code here
+
+	rec::robotino::api2::msleep(100); 
+    
+    
+
+    
+    	//TODO: your code here
 		//omniDrive.setVelocity( xspeed, yspeed, rotspeed );
-		// void setVelocity(float 1.0, float 0, float 0)
-		//com.processEvents();
-		//rec::robotino::api2::msleep( 100 );
-    // void setVelocity(float -1.0, float 0, float 0)
-    // com.processEvents();
-		// rec::robotino::api2::msleep( 100 );
-    //void setVelocity(float 0, float 1.0, float 0)
-    // com.processEvents();
-		// rec::robotino::api2::msleep( 100 );
-    // void setVelocity(float 0, float -1.0, float 0)
-		// com.processEvents();
-		// rec::robotino::api2::msleep( 100 );
-
-
-    // FAHREN MIT TASTEN!!
-	
-    void InputDrive(){
-	  char InputButton = ' ';
-
-	  com.processEvents();
-
-
-      if (InputButton == 'W'){
-		void setVelocity(float 1.0, float 0, float 0)
-        com.processEvents();
-        rec::robotino::api2::msleep( 100 );
-        InputDrive();
-    }
-
-      if (InputButton == 'S'){
-		void setVelocity(float -1.0, float 0, float 0)
-        com.processEvents();
-        rec::robotino::api2::msleep( 100 );
-        InputDrive();
-    }
-
-
-      if (InputButton == 'A'){
-		void setVelocity(float 0, float -1.0, float 0)
-        com.processEvents();
-        rec::robotino::api2::msleep( 100 );
-        InputDrive();
-    }
-
-      if (InputButton == 'D'){
-		void setVelocity(float 0, float 1.0, float 0)
-        com.processEvents();
-        rec::robotino::api2::msleep( 100 );
-        InputDrive();
-    }
-
-  
 
 
 
-		com.processEvents();
-		rec::robotino::api2::msleep( 100 );
+        system("stty raw");
+        w = getchar(); 
+        // terminate when "." is pressed
+        system("stty cooked");
+        system("clear");
+        std::cout << w << " was pressed."<< std::endl;
+
+        if (w == 'w'){
+            omniDrive.setVelocity(0.2, 0, 0);
+        }
+
+        if (w == 'a'){
+            omniDrive.setVelocity(0, -0.2, 0);
+        }
+
+        if (w == 's'){
+            omniDrive.setVelocity(-0.2, 0, 0);
+            
+        }
+
+        if (w == 'd'){
+            omniDrive.setVelocity(0, 0.2, 0);
+        }
+
+
+        if (w == 'r'){
+            rotateRight();
+        }
+
+        if (w == 'q'){
+            rotateLeft();
+        }
+
+        if(w == '.') {
+            system("stty cooked");
+            exit(0);
+        }  
+
+    
 
 
 
-    }
-		InputDrive();
 
+
+
+	com.processEvents();
+    rec::robotino::api2::msleep(10); 
 	}
 }
+
+
+
 
 void destroy()
 {
@@ -168,10 +249,7 @@ int main( int argc, char **argv )
 		hostname = argv[1];
 	}
 
-	struct sigaction act;
-	memset( &act, 0, sizeof( act ) );
-	act.sa_handler = sigint_handler;
-	sigaction( SIGINT, &act, NULL );
+
 
 	//main program routine starts in here
 	try
@@ -203,3 +281,4 @@ int main( int argc, char **argv )
 	rec::robotino::api2::waitForKey();
 #endif
 }
+
