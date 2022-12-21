@@ -142,11 +142,7 @@ void rotate(){
 
 }
 
-void DriveUntilWhite(){
-    while (0 == digital_inputs){
-        omniDrive.setVelocity(0.3,0,0);
-    }
-}
+
 
 void DriveUntilBlack(){
     while (0 != digital_inputs){
@@ -198,6 +194,7 @@ void drive()
             omniDrive.setVelocity(0.2,0,0);
         }
     }
+  }
 
 }
 
@@ -223,4 +220,23 @@ int main( int argc, char **argv )
 		com.disconnectFromServer();
 
 	}
+    catch( const rec::robotino::api2::RobotinoException& e )
+	{
+		std::cerr << "Com Error: " << e.what() << std::endl;
+	}
+	catch( const std::exception& e )
+	{
+		std::cerr << "Error: " << e.what() << std::endl;
+	}
+	catch( ... )
+	{
+		std::cerr << "Unknow Error" << std::endl;
+	}
+
+	rec::robotino::api2::shutdown();
+
+#ifdef WIN32
+	std::cout << "Press any key to exit..." << std::endl;
+	rec::robotino::api2::waitForKey();
+#endif
 }
