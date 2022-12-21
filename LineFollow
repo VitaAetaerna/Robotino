@@ -116,8 +116,58 @@ void init( const std::string& hostname )
 }
 
 
+void rotate(){
+	int Rotation = 0;
+	int turning = 0;
+	cout << "Enter Rotation (2.96 Ganze Umdrehung): ";
+	cin >> Rotation;
+	
+	if (0 <= Rotation){
+		turning = 1;
+	}
 
+	while (1 == turning){
+		com.processEvents();
+		omniDrive.setVelocity(0, 0, -0.4);
+		cout << phi_absolute;
+		rec::robotino::api2::msleep(100);
+	    // cout << "X: " << x << " Y: " << y << "Richtung: " << phi << "Sequenz: " << s << endl;
+		if (Rotation <= phi_absolute){
+			turning = 0;
+			
+		}
+	}
+	com.processComEvents();
+	
 
+}
+
+void DriveUntilWhite(){
+    while (0 == digital_inputs){
+        omniDrive.setVelocity(0.3,0,0);
+    }
+}
+
+void DriveUntilBlack(){
+    while (0 != digital_inputs){
+        for (int i=0; i<5; i++){
+            omniDrive.setVelocity(0.3, 0, 0);
+        }
+        for (int i=0; i<5; i++){
+            omniDrive.setVelocity(-0.3, 0,0 );
+        }
+        for (int i=0; i<5; i++){
+            omniDrive.setVelocity(0, 0.3, 0);
+        }
+        for (int i=0; i<5; i++){
+            omniDrive.setVelocity(0, -0.3, 0);
+        }
+        
+    
+     
+        com.processEvents();
+    }
+}
 
 
 void drive()
@@ -133,26 +183,24 @@ void drive()
     
     DigitalInput();
 
+    DriveUntilBlack();
+
+
+	com.processEvents();
+    rec::robotino::api2::msleep(100); 
     if (0 == digital_inputs[0]){
         omniDrive.setVelocity(0.2,0,0);
     }
     if (1 == digital_inputs[0]){
         omniDrive.setVelocity(0,0,0);
+        rotate();
+        if (digital_inputs != 0){
+            omniDrive.setVelocity(0.2,0,0);
+        }
     }
 
-
-	com.processEvents();
-    rec::robotino::api2::msleep(100); 
-	}
 }
 
-
-
-
-void destroy()
-{
-	com.disconnectFromServer();
-}
 
 int main( int argc, char **argv )
 {
@@ -172,26 +220,7 @@ int main( int argc, char **argv )
 		//drive (this contains a while loop)
 		drive();
 		//exit
-		destroy();
-	}
-	catch( const rec::robotino::api2::RobotinoException& e )
-	{
-		std::cerr << "Com Error: " << e.what() << std::endl;
-	}
-	catch( const std::exception& e )
-	{
-		std::cerr << "Error: " << e.what() << std::endl;
-	}
-	catch( ... )
-	{
-		std::cerr << "Unknow Error" << std::endl;
-	}
+		com.disconnectFromServer();
 
-	rec::robotino::api2::shutdown();
-
-#ifdef WIN32
-	std::cout << "Press any key to exit..." << std::endl;
-	rec::robotino::api2::waitForKey();
-#endif
+	}
 }
-
